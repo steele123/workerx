@@ -1,8 +1,9 @@
-import { Hono } from "hono";
-import { Bindings } from "../bindings";
-import isbot from 'isbot'
-import { IMAGE_PREVIEW_URL } from "../constants";
-import { nanoid } from "../id";
+import { Hono } from 'hono';
+import { Bindings } from '../bindings';
+import isbot from 'isbot';
+import { IMAGE_PREVIEW_URL } from '../constants';
+import { nanoid } from '../id';
+import { extension } from 'mime-types';
 
 export const fileRouter = new Hono<{
 	Bindings: Bindings;
@@ -18,15 +19,15 @@ fileRouter.get('/:id', async (c) => {
 			error: 'Not found',
 		});
 	}
-    
-    // If its a bot don't send the file, since its probably for a link preview, instead send
-    // HTML for the OpenGraph tags
-    const ua = c.req.headers.get('User-Agent')
-    if (isbot(ua)) {
-        const url = `${c.env.SITE_URL}/${file.key}`
-        const fileSize = file.size
 
-        return c.html(`
+	// If its a bot don't send the file, since its probably for a link preview, instead send
+	// HTML for the OpenGraph tags
+	const ua = c.req.headers.get('User-Agent');
+	if (isbot(ua)) {
+		const url = `${c.env.SITE_URL}/${file.key}`;
+		const fileSize = Math.round(file.size / 1024);
+
+		return c.html(`
             <html>
                 <head>
                     <meta property="og:title" content="File Download" />
@@ -40,8 +41,8 @@ fileRouter.get('/:id', async (c) => {
                     <a href="${url}">File</a>
                 </body>
             </html>
-        `)
-    }
+        `);
+	}
 
 	const headers = new Headers();
 	file.writeHttpMetadata(headers);
@@ -56,10 +57,10 @@ fileRouter.post('/', async (c) => {
 	const store = c.env.STORAGE;
 	const body = await c.req.arrayBuffer();
 	const id = nanoid();
-	const fileExt = c.req.headers.get('Content-Type')?.split('/')[1];
-    const key = `file/${id}.${fileExt}`;
+	const fileExt = extension(c.req.headers.get('Content-Type') ?? '') ?? 'bin';
+	const key = `file/${id}.${fileExt}`;
 	await store.put(key, body);
-    const url = `${c.env.SITE_URL}/${key}`
+	const url = `${c.env.SITE_URL}/${key}`;
 
 	return c.json({
 		url: url,

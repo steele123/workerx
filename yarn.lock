@@ -281,6 +281,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/mime-types@npm:^2.1.4":
+  version: 2.1.4
+  resolution: "@types/mime-types@npm:2.1.4"
+  checksum: f8c521c54ee0c0b9f90a65356a80b1413ed27ccdc94f5c7ebb3de5d63cedb559cd2610ea55b4100805c7349606a920d96e54f2d16b2f0afa6b7cd5253967ccc9
+  languageName: node
+  linkType: hard
+
 "@types/node-forge@npm:^1.3.0":
   version: 1.3.10
   resolution: "@types/node-forge@npm:1.3.10"
@@ -993,6 +1000,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mime-db@npm:1.52.0":
+  version: 1.52.0
+  resolution: "mime-db@npm:1.52.0"
+  checksum: 0d99a03585f8b39d68182803b12ac601d9c01abfa28ec56204fa330bc9f3d1c5e14beb049bafadb3dbdf646dfb94b87e24d4ec7b31b7279ef906a8ea9b6a513f
+  languageName: node
+  linkType: hard
+
+"mime-types@npm:^2.1.35":
+  version: 2.1.35
+  resolution: "mime-types@npm:2.1.35"
+  dependencies:
+    mime-db: 1.52.0
+  checksum: 89a5b7f1def9f3af5dad6496c5ed50191ae4331cc5389d7c521c8ad28d5fdad2d06fd81baf38fed813dc4e46bb55c8145bb0ff406330818c9cf712fb2e9b3836
+  languageName: node
+  linkType: hard
+
 "mime@npm:^3.0.0":
   version: 3.0.0
   resolution: "mime@npm:3.0.0"
@@ -1634,8 +1657,10 @@ __metadata:
   resolution: "workerx@workspace:."
   dependencies:
     "@cloudflare/workers-types": ^4.20230419.0
+    "@types/mime-types": ^2.1.4
     hono: ^3.10.1
     isbot: ^3.7.1
+    mime-types: ^2.1.35
     nanoid: ^5.0.3
     typescript: ^5.0.4
     wrangler: ^3.0.0

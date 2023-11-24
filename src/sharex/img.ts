@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { Bindings } from '../bindings';
 import { nanoid } from '../id';
+import { extension } from 'mime-types';
 
 export const imgRouter = new Hono<{
 	Bindings: Bindings;
@@ -30,10 +31,10 @@ imgRouter.post('/', async (c) => {
 	const store = c.env.STORAGE;
 	const body = await c.req.arrayBuffer();
 	const id = nanoid();
-	const fileExt = c.req.headers.get('Content-Type')?.split('/')[1];
-    const key = `img/${id}.${fileExt}`;
+	const fileExt = extension(c.req.headers.get('Content-Type') ?? '') ?? 'bin';
+	const key = `img/${id}.${fileExt}`;
 	await store.put(key, body);
-    const url = `${c.env.SITE_URL}/${key}`
+	const url = `${c.env.SITE_URL}/${key}`;
 
 	return c.json({
 		url: url,
