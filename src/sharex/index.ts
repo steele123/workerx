@@ -3,6 +3,7 @@ import { cache } from 'hono/cache'
 import { imgRouter } from "./img";
 import { fileRouter } from "./file";
 import { linkRouter } from "./link";
+import { utilityRouter } from "../utility";
 
 export const shareRouter = new Hono()
 
@@ -15,5 +16,8 @@ shareRouter.get("*", cache({
 shareRouter.route("/img", imgRouter)
 // file sharer
 shareRouter.route("/file", fileRouter)
+
+shareRouter.route("", utilityRouter)
+
 // link sharer
 shareRouter.route("/", linkRouter)

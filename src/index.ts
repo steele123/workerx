@@ -6,6 +6,4 @@ const app = new Hono();
 
 app.route("", shareRouter)
 
-app.route("", utilityRouter)
-
 export default app; // for Cloudflare Workers or Bun
