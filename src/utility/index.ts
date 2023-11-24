@@ -10,7 +10,7 @@ utilityRouter.get('/ua', async (c) => {
 	return c.text(c.req.header('User-Agent') ?? 'Unknown User-Agent');
 });
 
-utilityRouter.get('/info', async (c) => {
+utilityRouter.get('/me/json', async (c) => {
 	return c.json({
 		ip: c.req.header('CF-Connecting-IP') ?? 'Unknown IP',
 		ua: c.req.header('User-Agent') ?? 'Unknown User-Agent',
