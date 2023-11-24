@@ -25,17 +25,17 @@ fileRouter.get('/:id', async (c) => {
 	const ua = c.req.headers.get('User-Agent');
 	if (isbot(ua)) {
 		const url = `${c.env.SITE_URL}/${file.key}`;
-		const fileSize = Math.round(file.size / 1024);
+		const fileSizeMb = file.size / 1024;
 
 		return c.html(`
             <html>
                 <head>
                     <meta property="og:title" content="File Download" />
-                    <meta property="og:description" content="Download the file ${id} (${fileSize} KB)." />
+                    <meta property="og:description" content="Download the file ${id} (${fileSizeMb} KB)." />
                     <meta property="og:image" content="${IMAGE_PREVIEW_URL}" />
                     <meta property="og:url" content="${url}" />
                     <meta property="og:type" content="website" />
-                    <meta property="og:site_name" content="steele's fs" />
+                    <meta property="og:site_name" content="steele's file storage" />
                 </head>
                 <body>
                     <a href="${url}">File</a>
@@ -55,11 +55,40 @@ fileRouter.get('/:id', async (c) => {
 
 fileRouter.post('/', async (c) => {
 	const store = c.env.STORAGE;
-	const body = await c.req.arrayBuffer();
-	const id = nanoid();
-	const fileExt = extension(c.req.headers.get('Content-Type') ?? '') ?? 'bin';
-	const key = `file/${id}.${fileExt}`;
-	await store.put(key, body);
+	const body = await c.req.parseBody();
+	if (!body) {
+		c.status(400);
+		return c.json({
+			error: 'No file provided',
+		});
+	}
+
+	if (body instanceof ArrayBuffer) {
+		c.status(400);
+		return c.json({
+			error: 'File is too large',
+		});
+	}
+
+	const file = body['file'] as File;
+	if (!file) {
+		c.status(400);
+		return c.json({
+			error: 'No file provided',
+		});
+	}
+
+	let fileName;
+	if (file.name) {
+		// remove file extension
+		fileName = file.name.replace(/\.[^/.]+$/, '');
+	} else {
+		fileName = nanoid();
+	}
+
+	const fileExt = extension(file.type ?? '') ?? 'bin';
+	const key = `file/${fileName}.${fileExt}`;
+	await store.put(key, await file.arrayBuffer());
 	const url = `${c.env.SITE_URL}/${key}`;
 
 	return c.json({

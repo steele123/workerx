@@ -31,7 +31,14 @@ imgRouter.post('/', async (c) => {
 	const store = c.env.STORAGE;
 	const body = await c.req.arrayBuffer();
 	const id = nanoid();
-	const fileExt = extension(c.req.headers.get('Content-Type') ?? '') ?? 'bin';
+	const fileExt = extension(c.req.headers.get('Content-Type') ?? '');
+	if (!fileExt) {
+		c.status(400);
+		return c.json({
+			error: 'Can\'t determine file extension',
+		});
+	}
+
 	const key = `img/${id}.${fileExt}`;
 	await store.put(key, body);
 	const url = `${c.env.SITE_URL}/${key}`;
