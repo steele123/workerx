@@ -58,7 +58,7 @@ fileRouter.post('/', async (c) => {
 	const id = nanoid();
 	const fileExt = c.req.headers.get('Content-Type')?.split('/')[1];
     const key = `file/${id}.${fileExt}`;
-	const file = await store.put(key, body);
+	await store.put(key, body);
     const url = `${c.env.SITE_URL}/${key}`
 
 	return c.json({

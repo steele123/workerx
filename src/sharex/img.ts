@@ -32,7 +32,7 @@ imgRouter.post('/', async (c) => {
 	const id = nanoid();
 	const fileExt = c.req.headers.get('Content-Type')?.split('/')[1];
     const key = `img/${id}.${fileExt}`;
-	const img = await store.put(key, body);
+	await store.put(key, body);
     const url = `${c.env.SITE_URL}/${key}`
 
 	return c.json({

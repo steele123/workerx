@@ -41,7 +41,7 @@ linkRouter.post('/link', async (c) => {
 	}
 
 	const id = nanoid();
-	const file = await c.env.KV.put(`link_${id}`, link);
+	await c.env.KV.put(`link_${id}`, link);
 	const url = `${c.env.SITE_URL}/${id}`;
 
 	return c.json({
