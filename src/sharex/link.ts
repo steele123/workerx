@@ -7,23 +7,17 @@ export const linkRouter = new Hono<{
 }>();
 
 linkRouter.get('/:id', async (c) => {
-	const store = c.env.STORAGE;
 	const path = c.req.param('id');
-	const file = await store.get(path);
-	if (!file) {
+	const link = await c.env.KV.get(`link_${path}`);
+
+	if (!link) {
 		c.status(404);
 		return c.json({
 			error: 'Not found',
 		});
 	}
 
-	const headers = new Headers();
-	file.writeHttpMetadata(headers);
-	headers.set('E-Tag', file.httpEtag);
-
-	return new Response(file.body, {
-		headers,
-	});
+    return c.redirect(link)
 });
 
 linkRouter.delete('/link/:id', async (c) => {
@@ -46,8 +40,8 @@ linkRouter.post('/link', async (c) => {
 		});
 	}
 
-    const id = nanoid();
-	const file = await c.env.KV.put(id, link);
+	const id = nanoid();
+	const file = await c.env.KV.put(`link_${id}`, link);
 	const url = `${c.env.SITE_URL}/${id}`;
 
 	return c.json({
