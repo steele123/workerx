@@ -7,6 +7,8 @@ import { utilityRouter } from "../utility";
 
 export const shareRouter = new Hono()
 
+shareRouter.route("", utilityRouter)
+
 shareRouter.get("*", cache({
     cacheName: "sharex",
     cacheControl: "public, max-age=31536000, immutable"
@@ -16,8 +18,6 @@ shareRouter.get("*", cache({
 shareRouter.route("/img", imgRouter)
 // file sharer
 shareRouter.route("/file", fileRouter)
-
-shareRouter.route("", utilityRouter)
 
 // link sharer
 shareRouter.route("/", linkRouter)
