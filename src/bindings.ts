@@ -9,4 +9,5 @@ export type Bindings = {
      * How long should the object live in the storage. (in seconds)
      */
     OBJECT_LIFETIME?: number;
+    KV: KVNamespace;
 };

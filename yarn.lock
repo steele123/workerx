@@ -915,6 +915,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"isbot@npm:^3.7.1":
+  version: 3.7.1
+  resolution: "isbot@npm:3.7.1"
+  checksum: 5cb697952f45bc30a1b30956cf3d1397733b25f533b3ddebe92aef3e7310a8460431ee06bff562693b2cd3bdb1b6da30aebcb7815f33cba6b87161ea122054fc
+  languageName: node
+  linkType: hard
+
 "isexe@npm:^2.0.0":
   version: 2.0.0
   resolution: "isexe@npm:2.0.0"
@@ -1628,6 +1635,7 @@ __metadata:
   dependencies:
     "@cloudflare/workers-types": ^4.20230419.0
     hono: ^3.10.1
+    isbot: ^3.7.1
     nanoid: ^5.0.3
     typescript: ^5.0.4
     wrangler: ^3.0.0

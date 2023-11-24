@@ -9,7 +9,7 @@ export const imgRouter = new Hono<{
 imgRouter.get('/:id', async (c) => {
 	const id = c.req.param('id');
 	const store = c.env.STORAGE;
-	const img = await store.get('img/' + id);
+	const img = await store.get(`img/${id}`);
 	if (!img) {
 		c.status(404);
 		return c.json({
@@ -44,7 +44,7 @@ imgRouter.post('/', async (c) => {
 imgRouter.delete('/:id', async (c) => {
 	const store = c.env.STORAGE;
 	const id = c.req.param('id');
-	await store.delete('img/' + id);
+	await store.delete(`img/${id}`);
 	return c.json({
 		success: true,
 	});
