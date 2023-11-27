@@ -23,7 +23,11 @@ fileRouter.get('/:id', async (c) => {
 	// If its a bot don't send the file, since its probably for a link preview, instead send
 	// HTML for the OpenGraph tags
 	const ua = c.req.headers.get('User-Agent');
-	if (isbot(ua)) {
+	const contentType = file.httpMetadata?.contentType ?? '';
+	const isImageOrVideo = contentType.startsWith('image/') || contentType.startsWith('video/');
+
+	// Only send the HTML if its a bot and its not an image or video as we want the image preview
+	if (isbot(ua) && !isImageOrVideo) {
 		const url = `${c.env.SITE_URL}/${file.key}`;
 		const fileSizeMb = file.size / 1024;
 
