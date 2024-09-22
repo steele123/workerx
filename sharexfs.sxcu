@@ -1,0 +1,13 @@
+﻿{
+  "Version": "16.1.0",
+  "Name": "fs share.catlab.gg",
+  "DestinationType": "TextUploader, FileUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://share.catlab.gg/file",
+  "Body": "MultipartFormData",
+  "FileFormName": "file",
+  "URL": "{json:url}",
+  "ThumbnailURL": "{json:url}",
+  "DeletionURL": "{json:delete}",
+  "ErrorMessage": "{json:success}"
+}

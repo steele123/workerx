@@ -1,0 +1,12 @@
+﻿{
+  "Version": "16.1.0",
+  "Name": "img share.catlab.gg",
+  "DestinationType": "ImageUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://share.catlab.gg/img",
+  "Body": "Binary",
+  "URL": "{json:url}",
+  "ThumbnailURL": "{json:url}",
+  "DeletionURL": "{json:delete}",
+  "ErrorMessage": "{json:success}"
+}

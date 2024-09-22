@@ -1,0 +1,13 @@
+﻿{
+  "Version": "16.1.0",
+  "Name": "link share.catlab.gg",
+  "DestinationType": "URLShortener, URLSharingService",
+  "RequestMethod": "POST",
+  "RequestURL": "https://share.catlab.gg/link",
+  "Body": "JSON",
+  "Data": "{\n  \"link\": \"{input}\"\n}",
+  "URL": "{json:url}",
+  "ThumbnailURL": "{json:url}",
+  "DeletionURL": "{json:delete}",
+  "ErrorMessage": "{json:success}"
+}

@@ -14,6 +14,7 @@ imgRouter.get('/:id', async (c) => {
 	if (!img) {
 		c.status(404);
 		return c.json({
+			success: false,
 			error: 'Not found',
 		});
 	}
@@ -35,6 +36,7 @@ imgRouter.post('/', async (c) => {
 	if (!fileExt) {
 		c.status(400);
 		return c.json({
+			success: false,
 			error: 'Can\'t determine file extension',
 		});
 	}
@@ -44,6 +46,7 @@ imgRouter.post('/', async (c) => {
 	const url = `${c.env.SITE_URL}/${key}`;
 
 	return c.json({
+		success: false,
 		url: url,
 		delete: url,
 	});

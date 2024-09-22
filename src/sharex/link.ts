@@ -36,6 +36,7 @@ linkRouter.post('/link', async (c) => {
 	if (!link) {
 		c.status(400);
 		return c.json({
+			success: false,
 			error: 'No link provided',
 		});
 	}
@@ -45,6 +46,7 @@ linkRouter.post('/link', async (c) => {
 	const url = `${c.env.SITE_URL}/${id}`;
 
 	return c.json({
+		success: true,
 		url: url,
 		delete: `${c.env.SITE_URL}/link/${id}`,
 	});

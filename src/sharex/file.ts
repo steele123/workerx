@@ -63,6 +63,7 @@ fileRouter.post('/', async (c) => {
 	if (!body) {
 		c.status(400);
 		return c.json({
+			success: false,
 			error: 'No file provided',
 		});
 	}
@@ -70,6 +71,7 @@ fileRouter.post('/', async (c) => {
 	if (body instanceof ArrayBuffer) {
 		c.status(400);
 		return c.json({
+			success: false,
 			error: 'File is too large',
 		});
 	}
@@ -78,6 +80,7 @@ fileRouter.post('/', async (c) => {
 	if (!file) {
 		c.status(400);
 		return c.json({
+			success: false,
 			error: 'No file provided',
 		});
 	}
@@ -98,6 +101,7 @@ fileRouter.post('/', async (c) => {
 	return c.json({
 		url: url,
 		delete: url,
+		success: true
 	});
 });
 
