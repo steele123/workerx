@@ -15,7 +15,7 @@ imgRouter.get('/:id', async (c) => {
 		c.status(404);
 		return c.json({
 			success: false,
-			error: 'Not found',
+			error: 'Not found'
 		});
 	}
 
@@ -24,11 +24,19 @@ imgRouter.get('/:id', async (c) => {
 	headers.set('E-Tag', img.httpEtag);
 
 	return new Response(img.body, {
-		headers,
+		headers
 	});
 });
 
 imgRouter.post('/', async (c) => {
+	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
+		c.status(401);
+		return c.json({
+			success: false,
+			error: 'Unauthorized'
+		});
+	}
+
 	const store = c.env.STORAGE;
 	const body = await c.req.arrayBuffer();
 	const id = nanoid();
@@ -37,7 +45,7 @@ imgRouter.post('/', async (c) => {
 		c.status(400);
 		return c.json({
 			success: false,
-			error: 'Can\'t determine file extension',
+			error: 'Can\'t determine file extension'
 		});
 	}
 
@@ -48,15 +56,23 @@ imgRouter.post('/', async (c) => {
 	return c.json({
 		success: false,
 		url: url,
-		delete: url,
+		delete: url
 	});
 });
 
 imgRouter.delete('/:id', async (c) => {
+	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
+		c.status(401);
+		return c.json({
+			success: false,
+			error: 'Unauthorized'
+		});
+	}
+
 	const store = c.env.STORAGE;
 	const id = c.req.param('id');
 	await store.delete(`img/${id}`);
 	return c.json({
-		success: true,
+		success: true
 	});
 });

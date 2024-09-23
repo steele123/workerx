@@ -16,7 +16,7 @@ fileRouter.get('/:id', async (c) => {
 	if (!file) {
 		c.status(404);
 		return c.json({
-			error: 'Not found',
+			error: 'Not found'
 		});
 	}
 
@@ -53,18 +53,26 @@ fileRouter.get('/:id', async (c) => {
 	headers.set('E-Tag', file.httpEtag);
 
 	return new Response(file.body, {
-		headers,
+		headers
 	});
 });
 
 fileRouter.post('/', async (c) => {
+	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
+		c.status(401);
+		return c.json({
+			success: false,
+			error: 'Unauthorized'
+		});
+	}
+
 	const store = c.env.STORAGE;
 	const body = await c.req.parseBody();
 	if (!body) {
 		c.status(400);
 		return c.json({
 			success: false,
-			error: 'No file provided',
+			error: 'No file provided'
 		});
 	}
 
@@ -72,7 +80,7 @@ fileRouter.post('/', async (c) => {
 		c.status(400);
 		return c.json({
 			success: false,
-			error: 'File is too large',
+			error: 'File is too large'
 		});
 	}
 
@@ -81,7 +89,7 @@ fileRouter.post('/', async (c) => {
 		c.status(400);
 		return c.json({
 			success: false,
-			error: 'No file provided',
+			error: 'No file provided'
 		});
 	}
 
@@ -106,10 +114,18 @@ fileRouter.post('/', async (c) => {
 });
 
 fileRouter.delete('/:id', async (c) => {
+	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
+		c.status(401);
+		return c.json({
+			success: false,
+			error: 'Unauthorized'
+		});
+	}
+
 	const store = c.env.STORAGE;
 	const id = c.req.param('id');
 	await store.delete(`file/${id}`);
 	return c.json({
-		success: true,
+		success: true
 	});
 });

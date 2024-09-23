@@ -13,23 +13,39 @@ linkRouter.get('/:id', async (c) => {
 	if (!link) {
 		c.status(404);
 		return c.json({
-			error: 'Not found',
+			error: 'Not found'
 		});
 	}
 
-    return c.redirect(link)
+	return c.redirect(link);
 });
 
 linkRouter.delete('/link/:id', async (c) => {
+	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
+		c.status(401);
+		return c.json({
+			success: false,
+			error: 'Unauthorized'
+		});
+	}
+
 	const store = c.env.STORAGE;
 	const path = c.req.param('id');
 	await store.delete(path);
 	return c.json({
-		success: true,
+		success: true
 	});
 });
 
 linkRouter.post('/link', async (c) => {
+	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
+		c.status(401);
+		return c.json({
+			success: false,
+			error: 'Unauthorized'
+		});
+	}
+
 	const body = await c.req.json();
 	const link = body.link;
 
@@ -37,7 +53,7 @@ linkRouter.post('/link', async (c) => {
 		c.status(400);
 		return c.json({
 			success: false,
-			error: 'No link provided',
+			error: 'No link provided'
 		});
 	}
 
@@ -48,6 +64,6 @@ linkRouter.post('/link', async (c) => {
 	return c.json({
 		success: true,
 		url: url,
-		delete: `${c.env.SITE_URL}/link/${id}`,
+		delete: `${c.env.SITE_URL}/link/${id}`
 	});
 });
