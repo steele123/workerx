@@ -1,0 +1,16 @@
+name = "share"
+main = "src/index.ts"
+node_compat = true
+compatibility_date = "2024-09-22"
+
+kv_namespaces = [
+	{ binding = "KV", id = "KVID" }
+]
+
+r2_buckets  = [
+	{ binding = "STORAGE", bucket_name = "BUCKETNAMEHERE"}
+]
+
+[vars]
+ACCESS_KEY = "YOURPASSWORD"
+SITE_URL = "https://example.com"
