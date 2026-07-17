@@ -4,9 +4,12 @@
   "DestinationType": "ImageUploader",
   "RequestMethod": "POST",
   "RequestURL": "https://share.catlab.gg/img",
+  "Headers": {
+    "Authorization": "YOUR_ACCESS_KEY"
+  },
   "Body": "Binary",
   "URL": "{json:url}",
   "ThumbnailURL": "{json:url}",
   "DeletionURL": "{json:delete}",
-  "ErrorMessage": "{json:success}"
+  "ErrorMessage": "{json:error}"
 }

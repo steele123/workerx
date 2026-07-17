@@ -1,9 +1,21 @@
 import { Hono } from 'hono';
 import { shareRouter } from './sharex';
-import { utilityRouter } from './utility';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Env }>();
 
-app.route("", shareRouter)
+app.onError((error, c) => {
+	console.error(
+		JSON.stringify({
+			message: 'Unhandled request error',
+			error: error.message,
+			method: c.req.method,
+			path: c.req.path,
+		}),
+	);
 
-export default app; // for Cloudflare Workers or Bun
+	return c.json({ success: false, error: 'Internal server error' }, 500);
+});
+
+app.route('/', shareRouter);
+
+export default app;

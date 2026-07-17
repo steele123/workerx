@@ -1,78 +1,49 @@
 import { Hono } from 'hono';
-import { Bindings } from '../bindings';
-import { nanoid } from '../id';
 import { extension } from 'mime-types';
+import { requireAccess } from '../auth';
+import { objectResponse, publicUrl } from '../http';
+import { createId } from '../id';
 
-export const imgRouter = new Hono<{
-	Bindings: Bindings;
-}>();
+export const imgRouter = new Hono<{ Bindings: Env }>();
 
 imgRouter.get('/:id', async (c) => {
-	const id = c.req.param('id');
-	const store = c.env.STORAGE;
-	const img = await store.get(`img/${id}`);
-	if (!img) {
-		c.status(404);
-		return c.json({
-			success: false,
-			error: 'Not found'
-		});
+	const image = await c.env.STORAGE.get(`img/${c.req.param('id')}`);
+
+	if (!image) {
+		return c.json({ success: false, error: 'Not found' }, 404);
 	}
 
-	const headers = new Headers();
-	img.writeHttpMetadata(headers);
-	headers.set('E-Tag', img.httpEtag);
+	return objectResponse(image);
+});
 
-	return new Response(img.body, {
-		headers
+imgRouter.post('/', requireAccess, async (c) => {
+	const body = c.req.raw.body;
+	const contentType = c.req.header('Content-Type')?.split(';', 1)[0]?.trim().toLowerCase() ?? '';
+	const fileExtension = extension(contentType);
+
+	if (!body) {
+		return c.json({ success: false, error: 'No image provided' }, 400);
+	}
+
+	if (!fileExtension) {
+		return c.json({ success: false, error: "Can't determine file extension" }, 400);
+	}
+
+	const key = `img/${createId()}.${fileExtension}`;
+	await c.env.STORAGE.put(key, body, {
+		httpMetadata: { contentType },
+	});
+	const url = publicUrl(c.env.SITE_URL, key);
+
+	return c.json({
+		success: true,
+		url,
+		delete: url,
 	});
 });
 
-imgRouter.post('/', async (c) => {
-	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
-		c.status(401);
-		return c.json({
-			success: false,
-			error: 'Unauthorized'
-		});
-	}
+imgRouter.delete('/:id', requireAccess, async (c) => {
+	await c.env.STORAGE.delete(`img/${c.req.param('id')}`);
 
-	const store = c.env.STORAGE;
-	const body = await c.req.arrayBuffer();
-	const id = nanoid();
-	const fileExt = extension(c.req.headers.get('Content-Type') ?? '');
-	if (!fileExt) {
-		c.status(400);
-		return c.json({
-			success: false,
-			error: 'Can\'t determine file extension'
-		});
-	}
-
-	const key = `img/${id}.${fileExt}`;
-	await store.put(key, body);
-	const url = `${c.env.SITE_URL}/${key}`;
-
-	return c.json({
-		success: false,
-		url: url,
-		delete: url
-	});
-});
-
-imgRouter.delete('/:id', async (c) => {
-	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
-		c.status(401);
-		return c.json({
-			success: false,
-			error: 'Unauthorized'
-		});
-	}
-
-	const store = c.env.STORAGE;
-	const id = c.req.param('id');
-	await store.delete(`img/${id}`);
-	return c.json({
-		success: true
-	});
+	return c.json({ success: true });
 });

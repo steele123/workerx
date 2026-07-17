@@ -1,4 +1,4 @@
-import { customAlphabet } from 'nanoid'
-import { ID_ALPHABET, ID_LENGTH } from './constants'
+import { customAlphabet } from 'nanoid';
+import { ID_ALPHABET, ID_LENGTH } from './constants';
 
-export const nanoid = customAlphabet(ID_ALPHABET, ID_LENGTH)
+export const createId = customAlphabet(ID_ALPHABET, ID_LENGTH);

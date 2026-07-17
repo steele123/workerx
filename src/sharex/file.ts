@@ -1,131 +1,101 @@
 import { Hono } from 'hono';
-import { Bindings } from '../bindings';
-import isbot from 'isbot';
-import { IMAGE_PREVIEW_URL } from '../constants';
-import { nanoid } from '../id';
+import { isBot } from 'isbot';
 import { extension } from 'mime-types';
+import { requireAccess } from '../auth';
+import { IMAGE_PREVIEW_URL } from '../constants';
+import { escapeHtml, objectResponse, publicUrl } from '../http';
+import { createId } from '../id';
 
-export const fileRouter = new Hono<{
-	Bindings: Bindings;
-}>();
+export const fileRouter = new Hono<{ Bindings: Env }>();
+
+function safeFileName(fileName: string): string {
+	return fileName.replace(/[^\x20-\x7e]|["\\]/g, '_').slice(0, 200);
+}
+
+function formatFileSize(sizeInBytes: number): string {
+	if (sizeInBytes >= 1024 * 1024) {
+		return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+}
 
 fileRouter.get('/:id', async (c) => {
 	const id = c.req.param('id');
-	const store = c.env.STORAGE;
-	const file = await store.get(`file/${id}`);
+	const file = await c.env.STORAGE.get(`file/${id}`);
+
 	if (!file) {
-		c.status(404);
-		return c.json({
-			error: 'Not found'
-		});
+		return c.json({ error: 'Not found' }, 404);
 	}
 
-	// If its a bot don't send the file, since its probably for a link preview, instead send
-	// HTML for the OpenGraph tags
-	const ua = c.req.headers.get('User-Agent');
+	const userAgent = c.req.header('User-Agent');
 	const contentType = file.httpMetadata?.contentType ?? '';
-	const isImageOrVideo = contentType.startsWith('image/') || contentType.startsWith('video/');
+	const isPreviewableMedia = contentType.startsWith('image/') || contentType.startsWith('video/');
 
-	// Only send the HTML if its a bot and its not an image or video as we want the image preview
-	if (isbot(ua) && !isImageOrVideo) {
-		const url = `${c.env.SITE_URL}/${file.key}`;
-		const fileSizeMb = file.size / 1024;
+	if (isBot(userAgent) && !isPreviewableMedia) {
+		const url = publicUrl(c.env.SITE_URL, file.key);
+		const escapedUrl = escapeHtml(url);
+		const description = escapeHtml(`Download ${id} (${formatFileSize(file.size)}).`);
 
 		return c.html(`
-            <html>
-                <head>
-                    <meta property="og:title" content="File Download" />
-                    <meta property="og:description" content="Download the file ${id} (${fileSizeMb} KB)." />
-                    <meta property="og:image" content="${IMAGE_PREVIEW_URL}" />
-                    <meta property="og:url" content="${url}" />
-                    <meta property="og:type" content="website" />
-                    <meta property="og:site_name" content="steele's file storage" />
-                </head>
-                <body>
-                    <a href="${url}">File</a>
-                </body>
-            </html>
-        `);
+			<!doctype html>
+			<html lang="en">
+				<head>
+					<meta charset="utf-8" />
+					<meta property="og:title" content="File download" />
+					<meta property="og:description" content="${description}" />
+					<meta property="og:image" content="${escapeHtml(IMAGE_PREVIEW_URL)}" />
+					<meta property="og:url" content="${escapedUrl}" />
+					<meta property="og:type" content="website" />
+					<meta property="og:site_name" content="Steele's file storage" />
+					<title>File download</title>
+				</head>
+				<body><a href="${escapedUrl}">Download file</a></body>
+			</html>
+		`);
 	}
 
-	const headers = new Headers();
-	file.writeHttpMetadata(headers);
-	headers.set('E-Tag', file.httpEtag);
-
-	return new Response(file.body, {
-		headers
-	});
+	return objectResponse(file);
 });
 
-fileRouter.post('/', async (c) => {
-	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
-		c.status(401);
-		return c.json({
-			success: false,
-			error: 'Unauthorized'
-		});
+fileRouter.post('/', requireAccess, async (c) => {
+	let form: Awaited<ReturnType<typeof c.req.parseBody>>;
+
+	try {
+		form = await c.req.parseBody();
+	} catch {
+		return c.json({ success: false, error: 'Invalid multipart body' }, 400);
 	}
 
-	const store = c.env.STORAGE;
-	const body = await c.req.parseBody();
-	if (!body) {
-		c.status(400);
-		return c.json({
-			success: false,
-			error: 'No file provided'
-		});
+	const file = form.file;
+
+	if (!(file instanceof File)) {
+		return c.json({ success: false, error: 'No file provided' }, 400);
 	}
 
-	if (body instanceof ArrayBuffer) {
-		c.status(400);
-		return c.json({
-			success: false,
-			error: 'File is too large'
-		});
-	}
+	const contentType = file.type || 'application/octet-stream';
+	const nameExtension = file.name.match(/\.([a-zA-Z0-9]{1,10})$/)?.[1]?.toLowerCase();
+	const fileExtension = extension(contentType) || nameExtension || 'bin';
+	const key = `file/${createId()}.${fileExtension}`;
+	const fileName = safeFileName(file.name || `file.${fileExtension}`);
 
-	const file = body['file'] as File;
-	if (!file) {
-		c.status(400);
-		return c.json({
-			success: false,
-			error: 'No file provided'
-		});
-	}
-
-	let fileName;
-	if (file.name) {
-		// remove file extension
-		fileName = file.name.replace(/\.[^/.]+$/, '');
-	} else {
-		fileName = nanoid();
-	}
-
-	const fileExt = extension(file.type ?? '') ?? 'bin';
-	const key = `file/${fileName}.${fileExt}`;
-	await store.put(key, await file.arrayBuffer());
-	const url = `${c.env.SITE_URL}/${key}`;
+	await c.env.STORAGE.put(key, file, {
+		httpMetadata: {
+			contentType,
+			contentDisposition: `attachment; filename="${fileName}"`,
+		},
+	});
+	const url = publicUrl(c.env.SITE_URL, key);
 
 	return c.json({
-		url: url,
+		success: true,
+		url,
 		delete: url,
-		success: true
 	});
 });
 
-fileRouter.delete('/:id', async (c) => {
-	if (c.env.ACCESS_KEY !== c.req.header('Authorization')) {
-		c.status(401);
-		return c.json({
-			success: false,
-			error: 'Unauthorized'
-		});
-	}
+fileRouter.delete('/:id', requireAccess, async (c) => {
+	await c.env.STORAGE.delete(`file/${c.req.param('id')}`);
 
-	const store = c.env.STORAGE;
-	const id = c.req.param('id');
-	await store.delete(`file/${id}`);
-	return c.json({
-		success: true
-	});
+	return c.json({ success: true });
 });

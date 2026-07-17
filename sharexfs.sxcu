@@ -4,10 +4,13 @@
   "DestinationType": "TextUploader, FileUploader",
   "RequestMethod": "POST",
   "RequestURL": "https://share.catlab.gg/file",
+  "Headers": {
+    "Authorization": "YOUR_ACCESS_KEY"
+  },
   "Body": "MultipartFormData",
   "FileFormName": "file",
   "URL": "{json:url}",
   "ThumbnailURL": "{json:url}",
   "DeletionURL": "{json:delete}",
-  "ErrorMessage": "{json:success}"
+  "ErrorMessage": "{json:error}"
 }

@@ -1,23 +1,12 @@
-import { Hono } from "hono";
-import { cache } from 'hono/cache'
-import { imgRouter } from "./img";
-import { fileRouter } from "./file";
-import { linkRouter } from "./link";
-import { utilityRouter } from "../utility";
+import { Hono } from 'hono';
+import { utilityRouter } from '../utility';
+import { fileRouter } from './file';
+import { imgRouter } from './img';
+import { linkRouter } from './link';
 
-export const shareRouter = new Hono()
+export const shareRouter = new Hono<{ Bindings: Env }>();
 
-shareRouter.route("", utilityRouter)
-
-shareRouter.get("*", cache({
-    cacheName: "sharex",
-    cacheControl: "public, max-age=31536000, immutable"
-}))
-
-// image sharer
-shareRouter.route("/img", imgRouter)
-// file sharer
-shareRouter.route("/file", fileRouter)
-
-// link sharer
-shareRouter.route("/", linkRouter)
+shareRouter.route('/', utilityRouter);
+shareRouter.route('/img', imgRouter);
+shareRouter.route('/file', fileRouter);
+shareRouter.route('/', linkRouter);

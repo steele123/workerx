@@ -4,10 +4,13 @@
   "DestinationType": "URLShortener, URLSharingService",
   "RequestMethod": "POST",
   "RequestURL": "https://share.catlab.gg/link",
+  "Headers": {
+    "Authorization": "YOUR_ACCESS_KEY"
+  },
   "Body": "JSON",
   "Data": "{\n  \"link\": \"{input}\"\n}",
   "URL": "{json:url}",
   "ThumbnailURL": "{json:url}",
   "DeletionURL": "{json:delete}",
-  "ErrorMessage": "{json:success}"
+  "ErrorMessage": "{json:error}"
 }
