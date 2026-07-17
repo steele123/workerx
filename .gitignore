@@ -17,5 +17,6 @@ coverage/
 
 # Logs and editor settings
 *.log
+*.cpuprofile
 .idea/
 .vscode/

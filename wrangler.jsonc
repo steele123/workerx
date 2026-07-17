@@ -16,11 +16,34 @@
 			"bucket_name": "personal",
 		},
 	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "workerx-metadata",
+			"database_id": "7eedd1c5-8091-4f09-82de-82e9683a4bab",
+			"migrations_dir": "migrations",
+		},
+	],
+	"images": {
+		"binding": "IMAGES",
+	},
+	"cache": {
+		"enabled": true,
+	},
+	"triggers": {
+		"crons": ["17 * * * *"],
+	},
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 0.1,
 	},
 	"vars": {
 		"SITE_URL": "https://share.catlab.gg",
+		"MAX_UPLOAD_BYTES": "52428800",
+		"MAX_TTL_SECONDS": "31536000",
+		"ALLOWED_MIME_TYPES": "*/*",
+		// Set both values to enable verified Cloudflare Access protection for /admin.
+		"TEAM_DOMAIN": "",
+		"POLICY_AUD": "",
 	},
 }

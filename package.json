@@ -2,24 +2,33 @@
 	"name": "workerx",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
+	"packageManager": "bun@1.3.3",
 	"scripts": {
-		"check": "pnpm run typecheck && pnpm run format:check && wrangler deploy --dry-run --outdir .wrangler/dist",
+		"check": "bun run typecheck && bun run format:check && bun run test && wrangler deploy --dry-run --outdir .wrangler/dist",
+		"db:migrate:local": "wrangler d1 migrations apply DB --local",
+		"db:migrate:remote": "wrangler d1 migrations apply DB --remote",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
+		"test": "vitest run",
 		"typecheck": "wrangler types worker-configuration.d.ts --env-file .dev.vars.example --include-runtime=false --strict-vars=false --check && tsc --noEmit"
 	},
 	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.18.5",
 		"@cloudflare/workers-types": "^5.20260717.1",
 		"@types/mime-types": "^3.0.1",
+		"@types/node": "^26.1.1",
 		"prettier": "^3.9.5",
 		"typescript": "^7.0.2",
+		"vitest": "^4.1.0",
 		"wrangler": "^4.111.0"
 	},
 	"dependencies": {
 		"hono": "^4.12.30",
 		"isbot": "^5.2.1",
+		"jose": "^6.2.3",
 		"mime-types": "^3.0.2",
 		"nanoid": "^6.0.0"
 	}
